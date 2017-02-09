@@ -7,6 +7,7 @@ def referenceAppGitRepo = "alexia-starter-kit"
 def referenceAppGitUrl = "ssh://jenkins@gerrit:29418/${PROJECT_NAME}/" + referenceAppGitRepo
 def lambdaCFRepoName= "Lambda_CF"
 def lambdaCFRepoUrl = "ssh://jenkins@gerrit:29418/${PROJECT_NAME}/" + lambdaCFRepoName
+def projectNameKey = projectFolderName.toLowerCase().replace("/", "-")
 
 // Jobs
 def createLambdaFunctionStack = freeStyleJob(projectFolderName + "/Create_Lambda_Function_Stack")
