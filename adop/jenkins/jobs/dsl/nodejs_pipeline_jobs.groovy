@@ -33,7 +33,7 @@ createLambdaFunctionStack.with{
 		numToKeep(25)
     }
 	parameters{
-		stringParam("LAMBDA_FUNCTION_CODE_REPO_URL","","Specify Repo URL to use for cloning the code for the Lambda function.")
+		stringParam("LAMBDA_FUNCTION_CODE_REPO_URL","https://github.com/kramos/alexia-starter-kit.git","Specify Repo URL to use for cloning the code for the Lambda function.")
 		stringParam("LAMBDA_FUNCTION_NAME","ExampleFunction","Specify a name for the lambda function.")
 		stringParam("LAMBDA_HANDLER","index.handler","The Handler for the Lambda Function")
 		stringParam("LAMBDA_FUNCTION_DESCRIPTION","A Simple Lambda Function","Description of the Lambda Function")
@@ -73,8 +73,32 @@ createLambdaFunctionStack.with{
 		  usernamePassword("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", '${AWS_CREDENTIALS}')
 		}
 	}
+	triggers {
+        gerrit{
+            events{
+                refUpdated()
+            }
+            configure { gerritxml ->
+                gerritxml / 'gerritProjects' {
+                    'com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.data.GerritProject' {
+                        compareType("PLAIN")
+                        pattern(projectFolderName + "/" + referenceAppgitRepo)
+                        'branches' {
+                            'com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.data.Branch' {
+                                compareType("PLAIN")
+                                pattern("master")
+                            }
+                        }
+                    }
+                }
+                gerritxml / serverName("__ANY__")
+            }
+        }
+    }
 	steps {
 		shell('''#!/bin/bash -ex
+		
+		git clone ${LAMBDA_FUNCTION_CODE_REPO_URL}
 		
 		lambda_function_stack_name="${LAMBDA_FUNCTION_NAME}_Stack"
 		
@@ -97,6 +121,7 @@ createLambdaFunctionStack.with{
 			parameters{
 			  predefinedProp("B",'${BUILD_NUMBER}')
 			  predefinedProp("PARENT_BUILD",'${JOB_NAME}')
+			  predefinedProp("LAMBDA_APP_URL",'${LAMBDA_FUNCTION_CODE_REPO_URL}')
 			}
 		  }
 		}
