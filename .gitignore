@@ -4,4 +4,7 @@ coverage
 speechAssets
 *.log
 .serverless
+*~
+*.swp
+*.swo
 .lambci.json
