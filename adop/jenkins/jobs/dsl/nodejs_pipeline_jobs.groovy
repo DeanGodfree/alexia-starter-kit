@@ -13,6 +13,7 @@ def createLambdaFunctionStack = freeStyleJob(projectFolderName + "/Create_Lambda
 def install = freeStyleJob(projectFolderName + "/Install")
 def test = freeStyleJob(projectFolderName + "/Test")
 def lint = freeStyleJob(projectFolderName + "/Lint")
+def codeAnalysis = freeStyleJob(projectFolderName + "/Code_Analysis")
 def deployLambda = freeStyleJob(projectFolderName + "/Deploy_Lambda")
 
 // Views
@@ -221,7 +222,7 @@ lint.with{
   }
   publishers{
     downstreamParameterized{
-      trigger(projectFolderName + "/Deploy_Lambda"){
+      trigger(projectFolderName + "/Code_Analysis"){
         condition("UNSTABLE_OR_BETTER")
         parameters{
           predefinedProp("B",'${B}')
@@ -230,6 +231,59 @@ lint.with{
       }
     }
   }
+}
+
+codeAnalysis.with {
+    description("This job runs code quality analysis for Alexia reference application using SonarQube.")
+    parameters {
+        stringParam("B", '', "Parent build number")
+        stringParam("PARENT_BUILD", "Reference_Application_Build", "Parent build name")
+    }
+    environmentVariables {
+        env('WORKSPACE_NAME', workspaceFolderName)
+        env('PROJECT_NAME', projectFolderName)
+        env('PROJECT_NAME_KEY', projectNameKey)
+    }
+    wrappers {
+        preBuildCleanup()
+        injectPasswords()
+        maskPasswords()
+        sshAgent("adop-jenkins-master")
+    }
+    label("java8")
+    steps {
+        copyArtifacts('Get_Code') {
+            buildSelector {
+                buildNumber('${B}')
+            }
+        }
+    }
+    configure { myProject ->
+        myProject / builders << 'hudson.plugins.sonar.SonarRunnerBuilder'(plugin: "sonar@2.2.1") {
+            project('sonar-project.properties')
+            properties('''sonar.projectKey=${PROJECT_NAME_KEY}
+sonar.projectName=${PROJECT_NAME}
+sonar.projectVersion=1.0.${B}
+sonar.sources=src/main/java
+sonar.language=java
+sonar.sourceEncoding=UTF-8
+sonar.scm.enabled=false''')
+            javaOpts()
+            jdk('(Inherit From Job)')
+            task()
+        }
+    }
+    publishers {
+        downstreamParameterized {
+            trigger(projectFolderName + "/Deploy_Lambda") {
+                condition("UNSTABLE_OR_BETTER")
+                parameters {
+                    predefinedProp("B", '${B}')
+                    predefinedProp("PARENT_BUILD", '${PARENT_BUILD}')
+                }
+            }
+        }
+    }
 }
 
 deployLambda.with{
