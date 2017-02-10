@@ -261,7 +261,7 @@ lint.with{
   }
 }
 
-createSpeechAssests.with{
+createSpeechAssets.with{
   description("")
   parameters{
     stringParam("B",'',"Parent build number")
