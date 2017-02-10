@@ -5,7 +5,7 @@ def projectFolderName = "${PROJECT_NAME}"
 // Variables
 def referenceAppGitRepo = "alexia-starter-kit"
 def referenceAppGitUrl = "ssh://jenkins@gerrit:29418/${PROJECT_NAME}/" + referenceAppGitRepo
-def lambdaCFRepoName= "Lambda_CF"
+def lambdaCFRepoName= "lambda_cf.git"
 def lambdaCFRepoUrl = "ssh://jenkins@gerrit:29418/${PROJECT_NAME}/" + lambdaCFRepoName
 def projectNameKey = projectFolderName.toLowerCase().replace("/", "-")
 
@@ -38,7 +38,7 @@ createLambdaFunctionStack.with{
 		stringParam("LAMBDA_FUNCTION_CODE_REPO_URL","https://github.com/kramos/alexia-starter-kit.git","Specify Repo URL to use for cloning the code for the Lambda function.")
 		stringParam("LAMBDA_FUNCTION_NAME","ExampleFunction","Specify a name for the lambda function.")
 		stringParam("LAMBDA_HANDLER","index.handler","The Handler for the Lambda Function")
-		stringParam("LAMBDA_FUNCTION_DESCRIPTION","A Simple Lambda Function","Description of the Lambda Function")
+		stringParam("LAMBDA_FUNCTION_DESCRIPTION","ASimpleLambdaFunction","Description of the Lambda Function")
 		stringParam("LAMBDA_EXECUTION_ROLE","","The AWS Identity and Access Management (IAM) execution role that Lambda assumes when it runs your code to access AWS services.")
 		stringParam("LAMBDA_RUNTIME","nodejs4.3","The runtime environment for the Lambda function you are uploading.")
 		choiceParam("AWS_REGION", ['eu-west-1', 'us-west-1', 'us-east-1', 'us-west-2', 'eu-central-1', 'ap-northeast-1', 'ap-southeast-1', 'ap-southeast-2', 'sa-east-1'], "The AWS Region to deploy the Stacks.")
@@ -61,7 +61,7 @@ createLambdaFunctionStack.with{
 				url("${lambdaCFRepoUrl}")
 				credentials("adop-jenkins-master")
 			}
-			branch("*/remote")
+			branch("*/master")
 		}
 	}
 	wrappers {
@@ -102,17 +102,38 @@ createLambdaFunctionStack.with{
 		
 		git clone ${LAMBDA_FUNCTION_CODE_REPO_URL}
 		
-		lambda_function_stack_name="${LAMBDA_FUNCTION_NAME}_Stack"
+		lambda_function_stack_name="${LAMBDA_FUNCTION_NAME}Stack"
 		
 		aws cloudformation create-stack --stack-name ${lambda_function_stack_name} --region ${AWS_REGION} --capabilities "CAPABILITY_IAM" \\
-			--tags "Key=CreatedBy,Value=Jenkins" }" \\
+			--tags "Key=CreatedBy,Value=Jenkins" \\
 			--template-body file://$WORKSPACE/Lambda_Function_CF.json \\
 			--parameters \\
 			ParameterKey=Lambda_Function_Name,ParameterValue=${LAMBDA_FUNCTION_NAME} \\
 			ParameterKey=Lambda_Handler,ParameterValue=${LAMBDA_HANDLER} \\
 			ParameterKey=Lambda_Function_Description,ParameterValue=${LAMBDA_FUNCTION_DESCRIPTION} \\
 			ParameterKey=Lambda_Execution_Role,ParameterValue=${LAMBDA_EXECUTION_ROLE} \\
-			ParameterKey=Lambda_Runtime,ParameterValue=${LAMBDA_RUNTIME} \\
+			ParameterKey=Lambda_Runtime,ParameterValue=${LAMBDA_RUNTIME}
+			
+			
+		
+
+aws cloudformation create-stack --stack-name ${environment_stack_name} --region ${AWS_REGION} --capabilities "CAPABILITY_IAM" \\
+			--tags "Key=CreatedBy,Value=ADOP-Jenkins" \\
+			--template-body file://$WORKSPACE/Fdn_Infra_CF.json \\
+			--parameters \\
+			ParameterKey=VpcId,ParameterValue=${VPC_ID} \\
+			ParameterKey=VpcPeeringId,ParameterValue=${VPC_PEERING_ID} \\
+			ParameterKey=AvailabilityZone1,ParameterValue=${AvailabilityZone[1]} \\
+			ParameterKey=IntGatewayId,ParameterValue=${INTERNET_GATEWAY_ID} \\
+			ParameterKey=NATSubnetCidr,ParameterValue=${NAT_SUBNET_CIDR} \\
+			ParameterKey=PrivateApplicationSubnetCidr,ParameterValue=${PRIVATE_APP_SUBNET_CIDR} \\
+			ParameterKey=DBAZ1SubnetCidr,ParameterValue=${DBAZ1_SUBNET_CIDR} \\
+			ParameterKey=WebServerSubnetCidr,ParameterValue=${WEBSERVER_SUBNET_CIDR} \\
+			ParameterKey=NATSubnetName,ParameterValue=${NAT_SUBNET_NAME} \\
+			ParameterKey=PrivateApplicationSubnetName,ParameterValue=${PRIVATE_APP_SUBNET_NAME} \\
+			ParameterKey=DBAZ1SubnetName,ParameterValue=${DBAZ1_SUBNET_NAME} \\
+			ParameterKey=WebServerSubnetName,ParameterValue=${WEBSERVER_SUBNET_NAME} \\
+			ParameterKey=AdopVpcCidr,ParameterValue=${ADOP_VPC_CIDR}		
 		''')
 	}
 	publishers{
