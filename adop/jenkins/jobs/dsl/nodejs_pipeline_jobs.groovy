@@ -114,26 +114,6 @@ createLambdaFunctionStack.with{
 			ParameterKey=LambdaExecutionRoleArn,ParameterValue=${LAMBDA_EXECUTION_ROLE} \\
 			ParameterKey=LambdaRuntime,ParameterValue=${LAMBDA_RUNTIME}
 			
-			
-		
-
-aws cloudformation create-stack --stack-name ${environment_stack_name} --region ${AWS_REGION} --capabilities "CAPABILITY_IAM" \\
-			--tags "Key=CreatedBy,Value=ADOP-Jenkins" \\
-			--template-body file://$WORKSPACE/Fdn_Infra_CF.json \\
-			--parameters \\
-			ParameterKey=VpcId,ParameterValue=${VPC_ID} \\
-			ParameterKey=VpcPeeringId,ParameterValue=${VPC_PEERING_ID} \\
-			ParameterKey=AvailabilityZone1,ParameterValue=${AvailabilityZone[1]} \\
-			ParameterKey=IntGatewayId,ParameterValue=${INTERNET_GATEWAY_ID} \\
-			ParameterKey=NATSubnetCidr,ParameterValue=${NAT_SUBNET_CIDR} \\
-			ParameterKey=PrivateApplicationSubnetCidr,ParameterValue=${PRIVATE_APP_SUBNET_CIDR} \\
-			ParameterKey=DBAZ1SubnetCidr,ParameterValue=${DBAZ1_SUBNET_CIDR} \\
-			ParameterKey=WebServerSubnetCidr,ParameterValue=${WEBSERVER_SUBNET_CIDR} \\
-			ParameterKey=NATSubnetName,ParameterValue=${NAT_SUBNET_NAME} \\
-			ParameterKey=PrivateApplicationSubnetName,ParameterValue=${PRIVATE_APP_SUBNET_NAME} \\
-			ParameterKey=DBAZ1SubnetName,ParameterValue=${DBAZ1_SUBNET_NAME} \\
-			ParameterKey=WebServerSubnetName,ParameterValue=${WEBSERVER_SUBNET_NAME} \\
-			ParameterKey=AdopVpcCidr,ParameterValue=${ADOP_VPC_CIDR}		
 		''')
 	}
 	publishers{
