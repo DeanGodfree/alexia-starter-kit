@@ -322,7 +322,7 @@ deployLambda.with{
     credentialsParam("AWS_CREDENTIALS"){
       type('com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl')
       description('AWS access key and secret key for your account (needed to deploy to Lambda)')
-      defaultValue('aws-key-non-prod')
+      defaultValue('aws-credentials')
       required()
     }
   }
