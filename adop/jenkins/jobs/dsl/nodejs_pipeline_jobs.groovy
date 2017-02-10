@@ -59,7 +59,7 @@ createLambdaFunctionStack.with{
 		git{
 			remote{
 				name("origin")
-				url("${LAMBDA_FUNCTION_CODE_REPO_URL}")
+				url("${referenceAppGitUrl}")
 				credentials("adop-jenkins-master")
 			}
 			branch("*/master")
