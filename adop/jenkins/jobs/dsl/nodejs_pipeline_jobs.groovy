@@ -135,7 +135,7 @@ install.with{
   description("This job performs an npm install")
   parameters{
     stringParam("B",'',"Parent build number")
-    stringParam("PARENT_BUILD","Get_Code","Parent build name")
+    stringParam("PARENT_BUILD","Create_Lambda_Function_Stack","Parent build name")
   }
   environmentVariables {
       env('WORKSPACE_NAME',workspaceFolderName)
@@ -156,7 +156,7 @@ install.with{
             |		--rm \\
             |		-v /var/run/docker.sock:/var/run/docker.sock \\
             |		-v jenkins_slave_home:/jenkins_slave_home/ \\
-            |		--workdir /jenkins_slave_home/${PROJECT_NAME}/Get_Code \\
+            |		--workdir /jenkins_slave_home/${PROJECT_NAME}/Create_Lambda_Function_Stack \\
             |		node \\
             |		npm install --save	
             |'''.stripMargin())
@@ -178,7 +178,7 @@ test.with{
   description("When triggered this will run the tests.")
   parameters{
     stringParam("B",'',"Parent build number")
-    stringParam("PARENT_BUILD","Get_Code","Parent build name")
+    stringParam("PARENT_BUILD","Create_Lambda_Function_Stack","Parent build name")
   }
   wrappers {
     preBuildCleanup()
@@ -199,7 +199,7 @@ test.with{
             |		--rm \\
             |		-v /var/run/docker.sock:/var/run/docker.sock \\
             |		-v jenkins_slave_home:/jenkins_slave_home/ \\
-            |		--workdir /jenkins_slave_home/${PROJECT_NAME}/Get_Code \\
+            |		--workdir /jenkins_slave_home/${PROJECT_NAME}/Create_Lambda_Function_Stack \\
             |		node \\
             |		npm run test
             |'''.stripMargin())
@@ -221,7 +221,7 @@ lint.with{
   description("This job will perform static code analysis")
   parameters{
     stringParam("B",'',"Parent build number")
-    stringParam("PARENT_BUILD","Get_Code","Parent build name")
+    stringParam("PARENT_BUILD","Create_Lambda_Function_Stack","Parent build name")
   }
   environmentVariables {
       env('WORKSPACE_NAME',workspaceFolderName)
@@ -242,7 +242,7 @@ lint.with{
             |		--rm \\
             |		-v /var/run/docker.sock:/var/run/docker.sock \\
             |		-v jenkins_slave_home:/jenkins_slave_home/ \\
-            |		--workdir /jenkins_slave_home/${PROJECT_NAME}/Get_Code \\
+            |		--workdir /jenkins_slave_home/${PROJECT_NAME}/Create_Lambda_Function_Stack \\
             |		node \\
             |		npm run lint
             |'''.stripMargin())
@@ -279,7 +279,7 @@ codeAnalysis.with {
     }
     label("java8")
     steps {
-        copyArtifacts('Get_Code') {
+        copyArtifacts('Create_Lambda_Function_Stack') {
             buildSelector {
                 buildNumber('${B}')
             }
@@ -317,7 +317,7 @@ deployLambda.with{
   description("This job will deploy the service to AWS Lambda.  You must created a global parameter with your AWS ACCESS and SECRET access keys.")
   parameters{
     stringParam("B",'',"Parent build number")
-    stringParam("PARENT_BUILD","Get_Code","Parent build name")
+    stringParam("PARENT_BUILD","Create_Lambda_Function_Stack","Parent build name")
     credentialsParam("AWS_CREDENTIALS"){
       type('com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl')
       description('AWS access key and secret key for your account (needed to deploy to Lambda)')
@@ -350,7 +350,7 @@ deployLambda.with{
             |		--rm \\
             |		-v /var/run/docker.sock:/var/run/docker.sock \\
             |		-v jenkins_slave_home:/jenkins_slave_home/ \\
-            |		--workdir /jenkins_slave_home/${PROJECT_NAME}/Get_Code \\
+            |		--workdir /jenkins_slave_home/${PROJECT_NAME}/Create_Lambda_Function_Stack \\
             |		--env AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \\
             |		--env AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \\
             |		node \\
