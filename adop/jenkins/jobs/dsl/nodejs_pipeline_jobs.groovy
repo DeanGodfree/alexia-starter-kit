@@ -3,7 +3,7 @@ def workspaceFolderName = "${WORKSPACE_NAME}"
 def projectFolderName = "${PROJECT_NAME}"
 
 // Variables
-def referenceAppGitRepo = "alexia-openslava-app.git"
+def referenceAppGitRepo = "alexia-starter-kit.git"
 def referenceAppGitUrl = "ssh://jenkins@gerrit:29418/${PROJECT_NAME}/" + referenceAppGitRepo
 def lambdaCFRepoName= "lambda_cf.git"
 def lambdaCFRepoUrl = "ssh://jenkins@gerrit:29418/${PROJECT_NAME}/" + lambdaCFRepoName
@@ -14,7 +14,7 @@ def createLambdaFunctionStack = freeStyleJob(projectFolderName + "/Create_Lambda
 def install = freeStyleJob(projectFolderName + "/Install")
 def test = freeStyleJob(projectFolderName + "/Test")
 def lint = freeStyleJob(projectFolderName + "/Lint")
-def codeAnalysis = freeStyleJob(projectFolderName + "/Code_Analysis")
+def createSpeechAssets = freeStyleJob(projectFolderName + "/Create_Speech_Assets")
 def deployLambda = freeStyleJob(projectFolderName + "/Deploy_Lambda")
 
 // Views
@@ -250,7 +250,64 @@ lint.with{
   }
   publishers{
     downstreamParameterized{
-      trigger(projectFolderName + "/deployLambda"){
+      trigger(projectFolderName + "/Create_Speech_Assets"){
+        condition("UNSTABLE_OR_BETTER")
+        parameters{
+          predefinedProp("B",'${B}')
+          predefinedProp("PARENT_BUILD", '${PARENT_BUILD}')
+        }
+      }
+    }
+  }
+}
+
+createSpeechAssests.with{
+  description("")
+  parameters{
+    stringParam("B",'',"Parent build number")
+    stringParam("PARENT_BUILD","Create_Lambda_Function_Stack","Parent build name")
+    credentialsParam("AWS_CREDENTIALS"){
+      type('com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl')
+      description('AWS access key and secret key for your account (needed to deploy to Lambda)')
+      defaultValue('aws-credentials')
+      required()
+    }
+  }
+
+  environmentVariables {
+      env('WORKSPACE_NAME',workspaceFolderName)
+      env('PROJECT_NAME',projectFolderName)
+  }
+  wrappers {
+    preBuildCleanup()
+    injectPasswords()
+    maskPasswords()
+    sshAgent("adop-jenkins-master")
+    credentialsBinding {
+      usernamePassword("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", '${AWS_CREDENTIALS}')
+    }
+  }
+  label("docker")
+  steps {
+    shell('''set +x
+            |echo Create the speech assets
+            |
+            |set -x
+            |docker run \\
+            |		--rm \\
+            |		-v /var/run/docker.sock:/var/run/docker.sock \\
+            |		-v jenkins_slave_home:/jenkins_slave_home/ \\
+            |		--workdir /jenkins_slave_home/${PROJECT_NAME}/Create_Lambda_Function_Stack \\
+            |		--env AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \\
+            |		--env AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \\
+            |		node \\
+            |		npm start &
+            |
+
+  }
+  publishers{
+    downstreamParameterized{
+      trigger(projectFolderName + "/Deploy_Lambda"){
         condition("UNSTABLE_OR_BETTER")
         parameters{
           predefinedProp("B",'${B}')
