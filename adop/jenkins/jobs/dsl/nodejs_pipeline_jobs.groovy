@@ -39,7 +39,7 @@ createLambdaFunctionStack.with{
 		stringParam("LAMBDA_FUNCTION_NAME","ExampleFunction","Specify a name for the lambda function.")
 		stringParam("LAMBDA_HANDLER","index.handler","The Handler for the Lambda Function")
 		stringParam("LAMBDA_FUNCTION_DESCRIPTION","ASimpleLambdaFunction","Description of the Lambda Function")
-		stringParam("LAMBDA_EXECUTION_ROLE","","The AWS Identity and Access Management (IAM) execution role that Lambda assumes when it runs your code to access AWS services.")
+		stringParam("LAMBDA_EXECUTION_ROLE","","The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) execution role that Lambda assumes when it runs your code to access AWS services.")
 		stringParam("LAMBDA_RUNTIME","nodejs4.3","The runtime environment for the Lambda function you are uploading.")
 		choiceParam("AWS_REGION", ['eu-west-1', 'us-west-1', 'us-east-1', 'us-west-2', 'eu-central-1', 'ap-northeast-1', 'ap-southeast-1', 'ap-southeast-2', 'sa-east-1'], "The AWS Region to deploy the Stacks.")
 		credentialsParam("AWS_CREDENTIALS"){
@@ -108,11 +108,11 @@ createLambdaFunctionStack.with{
 			--tags "Key=CreatedBy,Value=Jenkins" \\
 			--template-body file://$WORKSPACE/Lambda_Function_CF.json \\
 			--parameters \\
-			ParameterKey=Lambda_Function_Name,ParameterValue=${LAMBDA_FUNCTION_NAME} \\
-			ParameterKey=Lambda_Handler,ParameterValue=${LAMBDA_HANDLER} \\
-			ParameterKey=Lambda_Function_Description,ParameterValue=${LAMBDA_FUNCTION_DESCRIPTION} \\
-			ParameterKey=Lambda_Execution_Role,ParameterValue=${LAMBDA_EXECUTION_ROLE} \\
-			ParameterKey=Lambda_Runtime,ParameterValue=${LAMBDA_RUNTIME}
+			ParameterKey=LambdaFunctionName,ParameterValue=${LAMBDA_FUNCTION_NAME} \\
+			ParameterKey=LambdaHandler,ParameterValue=${LAMBDA_HANDLER} \\
+			ParameterKey=LambdaFunctionDescription,ParameterValue=${LAMBDA_FUNCTION_DESCRIPTION} \\
+			ParameterKey=LambdaExecutionRoleArn,ParameterValue=${LAMBDA_EXECUTION_ROLE} \\
+			ParameterKey=LambdaRuntime,ParameterValue=${LAMBDA_RUNTIME}
 			
 			
 		
