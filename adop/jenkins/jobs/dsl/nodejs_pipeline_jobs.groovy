@@ -53,12 +53,13 @@ createLambdaFunctionStack.with{
 	environmentVariables {
       env('WORKSPACE_NAME',workspaceFolderName)
       env('PROJECT_NAME',projectFolderName)
+	  env('LAMBDA_CF_REPO',lambdaCFRepoUrl)
     }
 	scm{
 		git{
 			remote{
 				name("origin")
-				url("${lambdaCFRepoUrl}")
+				url("${LAMBDA_FUNCTION_CODE_REPO_URL}")
 				credentials("adop-jenkins-master")
 			}
 			branch("*/master")
@@ -100,13 +101,13 @@ createLambdaFunctionStack.with{
 	steps {
 		shell('''#!/bin/bash -ex
 		
-		git clone ${LAMBDA_FUNCTION_CODE_REPO_URL}
+		git clone ${LAMBDA_CF_REPO}
 		
 		lambda_function_stack_name="${LAMBDA_FUNCTION_NAME}Stack"
 		
 		aws cloudformation create-stack --stack-name ${lambda_function_stack_name} --region ${AWS_REGION} --capabilities "CAPABILITY_IAM" \\
 			--tags "Key=CreatedBy,Value=Jenkins" \\
-			--template-body file://$WORKSPACE/Lambda_Function_CF.json \\
+			--template-body file://$WORKSPACE/lambda_cf/Lambda_Function_CF.json \\
 			--parameters \\
 			ParameterKey=LambdaFunctionName,ParameterValue=${LAMBDA_FUNCTION_NAME} \\
 			ParameterKey=LambdaHandler,ParameterValue=${LAMBDA_HANDLER} \\
