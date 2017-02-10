@@ -302,7 +302,7 @@ createSpeechAssests.with{
             |		--env AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \\
             |		node \\
             |		npm start &
-            |
+            |'''.stripMargin())
 
   }
   publishers{
