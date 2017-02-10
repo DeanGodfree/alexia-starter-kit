@@ -1,3 +1,4 @@
 ssh://git@innersource.accenture.com/atl/alexia-openslava-app.git
 ssh://git@innersource.accenture.com/atl/lambda_cf.git
 https://github.com/DeanGodfree/alexia-starter-kit.git
+ssh://git@innersource.accenture.com/atl/alexia-openslava-app.git
